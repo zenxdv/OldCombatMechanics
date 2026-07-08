@@ -1,0 +1,27 @@
+name: OldCombatMechanics
+version: 1.0.1
+main: net.mosspad.oldcombatmechanics.OldCombatMechanicsPlugin
+api-version: '26.1'
+author: Ralph
+website: https://mosspad.net
+description: Configurable classic-style PvP mechanics for modern Spigot and Paper servers.
+
+commands:
+  oldcombat:
+    description: Admin controls for Old Combat Mechanics.
+    usage: /<command> <reload|status|world>
+    aliases: [ocm]
+
+permissions:
+  oldcombat.admin:
+    description: Grants access to all Old Combat Mechanics admin commands.
+    default: op
+    children:
+      oldcombat.reload: true
+      oldcombat.status: true
+  oldcombat.reload:
+    description: Reloads Old Combat Mechanics configuration.
+    default: op
+  oldcombat.status:
+    description: Views Old Combat Mechanics status and world settings.
+    default: op

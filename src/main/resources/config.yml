@@ -1,0 +1,135 @@
+# OldCombatMechanics configuration
+#
+# Each world entry inherits every missing value from "defaults". No world names
+# are hard-coded. Unlisted worlds use defaults unless world-control blocks them.
+# Run /oldcombat reload after changing this file.
+
+settings:
+  config-version: 1
+  log-configuration-warnings: true
+
+# Optional global world lists. Both lists use case-insensitive names.
+# - Empty enabled-worlds: defaults/overrides apply to every world not disabled below.
+# - Non-empty enabled-worlds: only listed worlds can use the plugin.
+# - disabled-worlds always wins over enabled-worlds and worlds.<name>.enabled: true.
+world-control:
+  enabled-worlds: []
+  disabled-worlds: []
+
+defaults:
+  # Set false to keep the plugin installed but inactive in unlisted worlds.
+  enabled: true
+
+  scope:
+    # Defaults only change player-versus-player combat.
+    # To allow configured mechanics in PvE, set player-only false AND pve-enabled true.
+    player-only: true
+    pve-enabled: false
+    # Optional filter when PvE is enabled. Empty means every living non-player target.
+    # Valid values: MONSTER, ANIMAL, WATER, VILLAGER, GOLEM, OTHER.
+    pve-entity-categories: []
+
+  fast-attack:
+    enabled: true
+    # Added to the player's attack-speed attribute. This modifier is namespaced,
+    # so the plugin can remove only its own change on reload, world change, and disable.
+    attack-speed-bonus: 16.0
+
+  melee:
+    enabled: true
+    # Avoid post-hit sprint reset/velocity when a protection or combat plugin made
+    # the final damage zero. Disable only when your combat stack intentionally wants it.
+    require-positive-final-damage: true
+
+    # Cancels vanilla sweep damage caused by direct player melee hits.
+    disable-sweeping-attacks: true
+
+    damage:
+      enabled: true
+      multiplier: 1.0
+      flat-bonus: 0.0
+      # Best-effort compensation for modern cooldown scaling, using the stable
+      # Player#getAttackCooldown public API. It is intentionally bounded below.
+      normalize-cooldown-scaling: true
+      maximum-normalization-multiplier: 5.0
+
+    knockback:
+      enabled: true
+      # Existing native velocity is multiplied before classic-style velocity is added.
+      # 0.0 replaces native hit velocity; higher values preserve more of it.
+      existing-velocity-multiplier: 0.0
+      horizontal: 0.38
+      vertical: 0.36
+      maximum-vertical: 0.42
+
+    # Extra horizontal knockback while the attacker is sprinting.
+    sprint-knockback-multiplier: 1.15
+
+    sprint-reset:
+      # Resets server-side sprint state after a successful sprint hit. It cannot
+      # change whether the player is physically holding their client sprint key.
+      enabled: true
+      delay-ticks: 1
+
+  rods:
+    enabled: true
+    # Applied only when Bukkit reports CAUGHT_ENTITY for a fishing hook.
+    pull:
+      existing-velocity-multiplier: 0.35
+      horizontal: 0.12
+      vertical: 0.08
+      maximum-vertical: 0.30
+
+  projectiles:
+    enabled: true
+    require-positive-final-damage: true
+    # Empty means every player-fired projectile. Restrict with entity type names,
+    # for example: ARROW, SPECTRAL_ARROW, TRIDENT, SNOWBALL, EGG, WIND_CHARGE.
+    allowed-types: []
+    damage:
+      enabled: true
+      multiplier: 1.0
+      flat-bonus: 0.0
+    knockback:
+      enabled: false
+      existing-velocity-multiplier: 0.35
+      horizontal: 0.22
+      vertical: 0.12
+      maximum-vertical: 0.35
+
+# Per-world overrides. Every missing path inherits from defaults.
+# Example:
+# worlds:
+#   practice:
+#     melee:
+#       knockback:
+#         horizontal: 0.40
+#   lobby:
+#     enabled: false
+worlds: {}
+
+# Optional per-weapon modifiers. Unknown material names are skipped with a warning.
+# `enabled: false` exempts that weapon from melee event changes; it does not remove
+# the global player attack-speed modifier, which is applied independently.
+# Example:
+# weapons:
+#   DIAMOND_SWORD:
+#     enabled: true
+#     damage:
+#       enabled: true
+#       multiplier: 1.0
+#       flat-bonus: 0.0
+#     knockback:
+#       horizontal-multiplier: 1.0
+#       vertical-multiplier: 1.0
+weapons: {}
+
+messages:
+  prefix: '&8[&bOldCombat&8] &7'
+  no-permission: '&cYou do not have permission to do that.'
+  reloaded: '&aConfiguration reloaded. Applied current world settings to online players.'
+  reload-failed: '&cConfiguration reload failed. The previous settings are still active; check console.'
+  status: '&fDefault enabled=&b{default_enabled}&f. Overrides=&b{world_count}&f, enabled list=&b{enabled_list}&f, disabled list=&b{disabled_list}&f.'
+  world-status: '&fWorld &b{world}&f: enabled=&b{enabled}&f, player-only=&b{player_only}&f, PvE=&b{pve}&f, attack speed bonus=&b{attack_speed}&f.'
+  world-not-found: '&cWorld ''{world}'' is not loaded.'
+  usage: '&fUsage: &b/oldcombat <reload|status|world <world>>'
